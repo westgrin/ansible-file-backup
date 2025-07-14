@@ -1,0 +1,17 @@
+- name: Backup files on the server
+  hosts: linux_servers
+  become: yes
+  tasks:
+    - name: Create backup directory
+      file:
+        path: /backup
+        state: directory
+        mode: '0755'
+    - name: Copy files to backup directory
+      copy:
+        src: /var/www/mywebsite/
+        dest: /backup/
+        remote_src: yes
+        directory_mode: '0755'
+    - name: Create timestamped tar archive
+      command: tar -czf /backup/website_backup_$(date +%Y%m%d_%H%M%S).tar.gz -C /var/www/mywebsite .

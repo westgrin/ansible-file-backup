@@ -1,0 +1,19 @@
+- name: Restore files from backup
+  hosts: linux_servers
+  become: yes
+  tasks:
+    - name: Remove existing files in target directory
+      file:
+        path: /var/www/mywebsite
+        state: absent
+    - name: Recreate target directory
+      file:
+        path: /var/www/mywebsite
+        state: directory
+        mode: '0755'
+    - name: Copy files back to original location
+      copy:
+        src: /backup/
+        dest: /var/www/mywebsite/
+        remote_src: yes
+        directory_mode: '0755'

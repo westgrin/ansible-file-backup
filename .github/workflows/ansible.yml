@@ -1,0 +1,26 @@
+name: Ansible File Backup and Restore
+on:
+  push:
+    branches: [ main ]
+jobs:
+  ansible:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Ansible
+      run: |
+        sudo apt update
+        sudo apt install ansible -y
+    - name: Copy SSH Key
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      run: |
+        mkdir -p ~/.ssh
+        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+    - name: Run Backup Playbook
+      run: |
+        ansible-playbook -i inventory.ini backup.yml --extra-vars "ansible_ssh_common_args='-o StrictHostKeyChecking=no'"
+    - name: Verify Backup
+      run: |
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@54.227.3.228 ls -l /backup
